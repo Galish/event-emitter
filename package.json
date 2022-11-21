@@ -1,0 +1,23 @@
+{
+  "name": "event-emitter",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "lint:err": "eslint . --quiet; exit 0",
+    "lint": "eslint .; exit 0",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^8.28.0",
+    "jest": "^29.3.1"
+  },
+  "jest": {
+    "clearMocks": true,
+    "testEnvironment": "jest-environment-node",
+    "transform": {}
+  }
+}
