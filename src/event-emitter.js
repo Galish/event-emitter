@@ -1,4 +1,4 @@
-import Handler from './handler'
+import createHandler from './handler'
 import { isEventNamePatternValid, matchesPattern } from './helpers'
 
 class EventEmitter {
@@ -24,15 +24,15 @@ class EventEmitter {
 	}
 
 	on(...args) {
-		this.#addListener(new Handler(...args))
+		this.#addListener(createHandler(...args))
 	}
 
 	once(...args) {
-		this.#addListener(new Handler(...args).executeOnce(true))
+		this.#addListener(createHandler(...args).executeOnce(true))
 	}
 
 	off(...args) {
-		const handler = new Handler(...args)
+		const handler = createHandler(...args)
 
 		for (const pattern of handler) {
 			if (!this.#listeners.has(pattern)) {
