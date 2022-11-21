@@ -1,12 +1,4 @@
-export function isEventNamePatternValid(input = '') {
-	return (
-		typeof input === 'string'
-		&&
-		/^([^.*]+|[*]|[*]{2}$)(\.([^.*]+|[*]|[*]{2}$))*$/g.test(input)
-	)
-}
-
-export function pattern2RegExp(pattern = '') {
+export default function pattern2RegExp(pattern = '') {
 	if (typeof pattern !== 'string') {
 		throw new Error('Pattern must be a string')
 	}
@@ -20,8 +12,4 @@ export function pattern2RegExp(pattern = '') {
 	} catch {
 		throw new Error('Invalid pattern')
 	}
-}
-
-export function matchesPattern(pattern = '', str = '') {
-	return pattern2RegExp(pattern).test(str)
 }
