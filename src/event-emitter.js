@@ -1,5 +1,6 @@
 import { createHandler, isEventNameValid } from './handler'
 import { matchesPattern } from './pattern'
+import { singleValueOrIter } from './utils'
 
 class EventEmitter {
 	#listeners
@@ -75,9 +76,10 @@ class EventEmitter {
 
 	stream(...events) {
 		const promise = {}
-		const handler = (...args) => setTimeout(() => {
-			promise.resolve(args.length > 1 ? args : args[ 0 ])
-		}, 0)
+
+		const handler = (...args) => setTimeout(() => (
+			promise.resolve(singleValueOrIter(...args))
+		), 0)
 
 		this.on(...events, handler)
 

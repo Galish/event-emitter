@@ -158,23 +158,41 @@ describe('Event emitter', () => {
 		})
 
 		it('should receive data', () => {
-			const spyOn = jest.fn()
+			const spyFn = jest.fn((...args) => (
+				args.map(
+					data => isIterator(data) ? Array.from(data) : data
+				)
+			))
+
 			const emitter = new EventEmitter()
 			const someArr = [ 'a', 'b', 'c' ]
 
-			emitter.on('foo.bla.bar1', 'foo.bla.bar2', 'foo.bla.bar3', spyOn)
+			emitter.on('foo.bla.bar1', 'foo.bla.bar2', 'foo.bla.bar3', spyFn)
 
 			emitter.emit('foo.bla.bar1', 10)
 			emitter.emit('foo.bla.bar2', '20')
 			emitter.emit('foo.bla.bar3', 'Some string', 'and text')
 			emitter.emit('foo.bla.bar4', 40)
 			emitter.emit('foo.bla.bar3', someArr)
-			emitter.emit('foo.bla.bar1', 60)
+			emitter.emit('foo.bla.bar1')
 
-			expect(spyOn).toHaveBeenCalledTimes(3)
-			expect(spyOn).toHaveBeenNthCalledWith(1, 10, '20', 'Some string', 'and text')
-			expect(spyOn).toHaveBeenNthCalledWith(2, 10, '20', someArr)
-			expect(spyOn).toHaveBeenNthCalledWith(3, 60, '20', someArr)
+			expect(spyFn).toHaveBeenCalledTimes(3)
+
+			expect(spyFn).toHaveBeenNthCalledWith(
+				1,
+				10,
+				'20',
+				expect.objectContaining({
+					[ Symbol.iterator ]: expect.any(Function)
+				})
+			)
+			expect(spyFn).toHaveNthReturnedWith(
+				1,
+				[ 10, '20' , [ 'Some string', 'and text' ] ]
+			)
+
+			expect(spyFn).toHaveBeenNthCalledWith(2, 10, '20', someArr)
+			expect(spyFn).toHaveBeenNthCalledWith(3, undefined, '20', someArr)
 		})
 
 		it('should terminate a listener', () => {
@@ -254,9 +272,13 @@ describe('Event emitter', () => {
 		})
 
 		it('should receive data', async() => {
-			const spyFn = jest.fn()
+			const spyFn = jest.fn(data => (
+				isIterator(data) ? Array.from(data) : data
+			))
+
 			const emitter = new EventEmitter()
-			const stream = emitter.stream('foo.**');
+			const stream = emitter.stream('foo.**')
+			const someObj = { a: 1, b: 2, c: 3 };
 
 			(async () => {
 				for await (const e of stream) {
@@ -265,15 +287,29 @@ describe('Event emitter', () => {
 			})()
 
 			emitter.emit('foo.bla.bar', 10)
-			emitter.emit('foo.bla.bar1', '20')
+			emitter.emit('foo.bla.bar1')
 			emitter.emit('foo.bla1.bar', 'Some string', 'and text')
+			emitter.emit('foo.bla', someObj)
 
 			await sleep(10)
 
-			expect(spyFn).toHaveBeenCalledTimes(3)
-			expect(spyFn).toHaveBeenCalledWith(10)
-			expect(spyFn).toHaveBeenCalledWith('20')
-			expect(spyFn).toHaveBeenCalledWith([ 'Some string', 'and text' ])
+			expect(spyFn).toHaveBeenCalledTimes(4)
+			expect(spyFn).toHaveBeenNthCalledWith(1, 10)
+			expect(spyFn).toHaveBeenNthCalledWith(2, undefined)
+
+			expect(spyFn).toHaveBeenNthCalledWith(
+				3,
+				expect.objectContaining({
+					[ Symbol.iterator ]: expect.any(Function)
+				})
+			)
+
+			expect(spyFn).toHaveNthReturnedWith(
+				3,
+				[ 'Some string', 'and text' ]
+			)
+
+			expect(spyFn).toHaveBeenNthCalledWith(4, someObj)
 		})
 
 		it('should terminate a stream', async() => {
@@ -305,6 +341,13 @@ describe('Event emitter', () => {
 
 })
 
+function isIterator(obj) {
+	return (
+		obj !== null
+		&&
+		typeof obj?.next === 'function'
+	)
+}
 
 function sleep(ms) {
 	return new Promise(reject => setTimeout(reject, ms))

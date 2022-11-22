@@ -1,4 +1,5 @@
 import Handler from './handler'
+import { singleValueOrIter } from '../utils'
 
 export default class MultipleEventHandler extends Handler {
 	#empty = Symbol('empty')
@@ -17,14 +18,17 @@ export default class MultipleEventHandler extends Handler {
 	execute(pattern, ...args) {
 		const results = []
 
-		this.#data.set(pattern, args)
+		this.#data.set(
+			pattern,
+			singleValueOrIter(...args)
+		)
 
 		for (const data of this.#data.values()) {
 			if (data === this.#empty) {
 				return
 			}
 
-			results.push(...data)
+			results.push(data)
 		}
 
 		this.isExecuted = true

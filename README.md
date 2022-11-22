@@ -74,15 +74,15 @@ const emitter = new EventEmitter();
 const handler = args => {
 	/*
 		Two events invoked with the following arguments:
-		-> 1, 2, 3, undefined, baz
-		-> 1, 2, 3, 2022, baz
+		-> @iterator( 1, 2, 3 ), undefined, baz
+		-> @iterator( 1, 2, 3 ), 2022, baz
 	*/
 };
 
 emitter.on('foo.bar.baz1', 'foo.bar.baz3', 'foo.bar.baz5', handler);
 
 emitter.emit('foo.bar.baz1', 1, 2, 3);
-emitter.emit('foo.bar.baz2', 'for', 'bar');
+emitter.emit('foo.bar.baz2', 'foo', 'bar');
 emitter.emit('foo.bar.baz3');
 emitter.emit('foo.bar.baz4', 4, 5);
 emitter.emit('foo.bar.baz5', 'baz');
@@ -99,7 +99,7 @@ const emitter = new EventEmitter();
 const handler = args => {
 	/*
 		Only first event invoked with the following arguments:
-		-> 1, 2, 3, undefined, baz
+		-> @iterator( 1, 2, 3 ), undefined, baz
 	*/
 };
 
@@ -125,9 +125,9 @@ const stream = emitter.stream('foo.**');
 	for await (const e of stream) {
 		/*
 			Events #1-3 invoked with the following arguments:
-			-> [ 1, 2, 3 ]
+			-> @iterator( 1, 2, 3 )
 			-> 'foo'
-			-> [ 'bar', 'baz' ]
+			-> @iterator( 'bar', 'baz' )
 		*/
 	}
 })();
