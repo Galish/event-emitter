@@ -5,7 +5,7 @@ export default class MultiEventListener extends EventListener {
 	#empty = Symbol('empty')
 	#data = new Map()
 
-	constructor(patterns, fn) {
+	constructor(patterns = [], fn) {
 		super(patterns, fn)
 
 		for (const pattern of patterns) {
@@ -16,6 +16,10 @@ export default class MultiEventListener extends EventListener {
 	}
 
 	execute(pattern, ...args) {
+		if (this.isDone) {
+			return
+		}
+
 		const results = []
 
 		this.#data.set(
@@ -31,12 +35,12 @@ export default class MultiEventListener extends EventListener {
 			results.push(data)
 		}
 
-		this.isExecuted = true
+		this._isExecuted = true
 
 		return this.fn(...results)
 	}
 
-	[ Symbol.iterator ]() {
+	values() {
 		return this.#data.keys()
 	}
 }

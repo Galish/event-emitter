@@ -3,11 +3,16 @@ import MultiEventListener from './multi-event-listener'
 import isEventNameValid from './is-event-name-valid'
 
 export default function createListener(...args) {
-	const events = args.length > 1
-		? args.slice(0, -1)
-		: new Array(1)
+	let events = [ ...args ]
+	let fn
 
-	const fn = args[ args.length - 1 ]
+	if (typeof args?.[ args.length - 1 ] === 'function') {
+		fn = events.pop()
+	}
+
+	if (events.length === 0) {
+		events = new Array(1)
+	}
 
 	for (const pattern of events) {
 		if (!isEventNameValid(pattern)) {

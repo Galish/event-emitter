@@ -1,9 +1,10 @@
 export default class EventListener {
-	isExecuted = false
-	isExecuteOnce = false
+	#eventNamePattern
+	_isExecuted = false
+	_isExecuteOnce = false
 
 	constructor(pattern, fn) {
-		this.eventNamePattern = Array.isArray(pattern)
+		this.#eventNamePattern = Array.isArray(pattern)
 			? pattern[ 0 ]
 			: pattern
 
@@ -11,26 +12,30 @@ export default class EventListener {
 	}
 
 	get isDone() {
-		return this.isExecuteOnce && this.isExecuted
+		return this._isExecuteOnce && this._isExecuted
 	}
 
 	execute(pattern, ...args) {
-		if (pattern !== this.eventNamePattern) {
+		if (
+			pattern !== this.#eventNamePattern
+			||
+			this.isDone === true
+		) {
 			return
 		}
 
-		this.isExecuted = true
+		this._isExecuted = true
 
 		return this.fn(...args)
 	}
 
 	executeOnce(value = true) {
-		this.isExecuteOnce = value
+		this._isExecuteOnce = value
 
 		return this
 	}
 
-	[ Symbol.iterator ]() {
-		return [ this.eventNamePattern ].values()
+	values() {
+		return [ this.#eventNamePattern ].values()
 	}
 }

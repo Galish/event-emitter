@@ -10,7 +10,7 @@ class EventEmitter {
 	}
 
 	#addListener(listener) {
-		for (const pattern of listener) {
+		for (const pattern of listener.values()) {
 			if (!this.#listeners.has(pattern)) {
 				this.#listeners.set(
 					pattern,
@@ -35,7 +35,7 @@ class EventEmitter {
 	off(...args) {
 		const listener = createListener(...args)
 
-		for (const pattern of listener) {
+		for (const pattern of listener.values()) {
 			if (!this.#listeners.has(pattern)) {
 				continue
 			}
@@ -68,7 +68,7 @@ class EventEmitter {
 				listener.execute(pattern, ...args)
 
 				if (listener.isDone) {
-					this.off(...listener, listener.fn)
+					this.off(...listener.values(), listener.fn)
 				}
 			}
 		}

@@ -10,10 +10,10 @@ describe('Create listener', () => {
 		).toThrow('Invalid event name pattern: undefined')
 	})
 
-	it('should throw an error with event name argument only', () => {
+	it('should not throw an error with event name argument only', () => {
 		expect(
 			() => createListener('event-name')
-		).toThrow('Invalid event name pattern: undefined')
+		).not.toThrow('Invalid event name pattern: undefined')
 	})
 
 	it('should throw an error with function argument only', () => {
