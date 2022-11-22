@@ -76,24 +76,45 @@ class EventEmitter {
 
 	stream(...events) {
 		const promise = {}
+		const queue = []
+		let isWaitinigToCancel = false
 
-		const handler = (...args) => setTimeout(() => (
-			promise.resolve(singleValueOrIter(...args))
-		), 0)
+		const handler = (...args) => {
+			queue.push(args)
+			promise.resolve?.()
+		}
 
 		this.on(...events, handler)
 
 		const generator = (async function *() {
 			while (true) {
-				yield await new Promise(resolve => promise.resolve = resolve)
+				while (true) {
+					if (queue.length === 0) {
+						break
+					}
+
+					yield singleValueOrIter(...queue.shift())
+				}
+
+				if (isWaitinigToCancel === true) {
+					return
+				}
+
+				await new Promise(resolve => promise.resolve = resolve)
 			}
 		})()
+
+		const cancel = () => {
+			this.off(...events, handler)
+			isWaitinigToCancel = true
+			promise.resolve?.()
+		}
 
 		Object.defineProperty(
 			generator,
 			'cancel',
 			{
-				value: () => this.off(...events, handler)
+				value: cancel
 			}
 		)
 

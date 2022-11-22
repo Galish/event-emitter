@@ -219,109 +219,107 @@ describe('Event emitter', () => {
 
 	describe('Streams', () => {
 
-		it('should provide a stream of events', async() => {
+		it('should provide a stream of events', done => {
 			const spyFn = jest.fn()
 			const emitter = new EventEmitter()
-			const stream = emitter.stream('foo.**');
-
-			(async () => {
-				for await (const e of stream) {
-					spyFn(e)
-				}
-			})()
+			const stream = emitter.stream('foo.**')
 
 			emitter.emit('foo.bla.bar')
 			emitter.emit('foo.bla.bar1')
 			emitter.emit('foo.bla1.bar')
 
-			await sleep(10)
+			stream.cancel();
 
-			expect(spyFn).toHaveBeenCalledTimes(3)
+			(async () => {
+				for await (const e of stream) {
+					spyFn(e)
+				}
+
+				done()
+				expect(spyFn).toHaveBeenCalledTimes(3)
+			})()
 		})
 
-		it('should provide multiple streams', async() => {
+		it('should provide multiple streams', done => {
 			const spyFn1 = jest.fn()
 			const spyFn2 = jest.fn()
 			const emitter = new EventEmitter()
 			const stream1 = emitter.stream('foo.**')
-			const stream2 = emitter.stream('foo.bla.**');
-
-			(async () => {
-				for await (const e of stream1) {
-					spyFn1(e)
-				}
-			})();
-
-			(async () => {
-				for await (const e of stream2) {
-					spyFn2(e)
-				}
-			})()
+			const stream2 = emitter.stream('foo.bla.**')
 
 			emitter.emit('foo.bla.bar1')
 			emitter.emit('foo.bla2.bar2')
 			emitter.emit('foo.bla.bar3')
 
 			stream1.cancel()
-			stream2.cancel()
+			stream2.cancel();
 
-			await sleep(10)
+			(async () => {
+				for await (const e of stream1) {
+					spyFn1(e)
+				}
 
-			expect(spyFn1).toHaveBeenCalledTimes(3)
-			expect(spyFn2).toHaveBeenCalledTimes(2)
+				expect(spyFn1).toHaveBeenCalledTimes(3)
+			})();
+
+			(async () => {
+				for await (const e of stream2) {
+					spyFn2(e)
+				}
+
+				done()
+
+				expect(spyFn2).toHaveBeenCalledTimes(2)
+			})()
 		})
 
-		it('should receive data', async() => {
+		it('should receive data', done => {
 			const spyFn = jest.fn(data => (
 				isIterator(data) ? Array.from(data) : data
 			))
 
 			const emitter = new EventEmitter()
 			const stream = emitter.stream('foo.**')
-			const someObj = { a: 1, b: 2, c: 3 };
-
-			(async () => {
-				for await (const e of stream) {
-					spyFn(e)
-				}
-			})()
+			const someObj = { a: 1, b: 2, c: 3 }
 
 			emitter.emit('foo.bla.bar', 10)
 			emitter.emit('foo.bla.bar1')
 			emitter.emit('foo.bla1.bar', 'Some string', 'and text')
 			emitter.emit('foo.bla', someObj)
 
-			await sleep(10)
-
-			expect(spyFn).toHaveBeenCalledTimes(4)
-			expect(spyFn).toHaveBeenNthCalledWith(1, 10)
-			expect(spyFn).toHaveBeenNthCalledWith(2, undefined)
-
-			expect(spyFn).toHaveBeenNthCalledWith(
-				3,
-				expect.objectContaining({
-					[ Symbol.iterator ]: expect.any(Function)
-				})
-			)
-
-			expect(spyFn).toHaveNthReturnedWith(
-				3,
-				[ 'Some string', 'and text' ]
-			)
-
-			expect(spyFn).toHaveBeenNthCalledWith(4, someObj)
-		})
-
-		it('should terminate a stream', async() => {
-			const spyFn = jest.fn()
-			const emitter = new EventEmitter()
-			const stream = emitter.stream('foo.**');
+			stream.cancel();
 
 			(async () => {
 				for await (const e of stream) {
 					spyFn(e)
 				}
+
+				done()
+
+				expect(spyFn).toHaveBeenCalledTimes(4)
+				expect(spyFn).toHaveBeenNthCalledWith(1, 10)
+				expect(spyFn).toHaveBeenNthCalledWith(2, undefined)
+
+				expect(spyFn).toHaveBeenNthCalledWith(
+					3,
+					expect.objectContaining({
+						[ Symbol.iterator ]: expect.any(Function)
+					})
+				)
+
+				expect(spyFn).toHaveNthReturnedWith(
+					3,
+					[ 'Some string', 'and text' ]
+				)
+
+				expect(spyFn).toHaveBeenNthCalledWith(4, someObj)
 			})()
+		})
+
+		it('should terminate stream', done => {
+			const spyFn = jest.fn()
+			const emitter = new EventEmitter()
+			const stream = emitter.stream('foo.**')
 
 			emitter.emit('foo.bla.bar')
 			emitter.emit('foo.bla.bar1')
@@ -330,16 +328,48 @@ describe('Event emitter', () => {
 
 			emitter.emit('foo.bla1.bar')
 			emitter.emit('foo.bla1.bar2')
-			emitter.emit('foo.bla2.bar2')
+			emitter.emit('foo.bla2.bar2');
 
-			await sleep(10)
+			(async () => {
+				for await (const e of stream) {
+					spyFn(e)
+				}
 
-			expect(spyFn).toHaveBeenCalledTimes(2)
+				done()
+
+				expect(spyFn).toHaveBeenCalledTimes(2)
+			})()
+		})
+
+		it('should terminate stream asynchronously', done => {
+			const spyFn = jest.fn()
+			const emitter = new EventEmitter()
+			const stream = emitter.stream('foo.**')
+
+			emitter.emit('foo.bla.bar')
+			emitter.emit('foo.bla.bar1')
+			emitter.emit('foo.bla1.bar')
+
+			sleep(1000).then(() => stream.cancel());
+
+			(async () => {
+				for await (const e of stream) {
+					spyFn(e)
+				}
+
+				done()
+
+				expect(spyFn).toHaveBeenCalledTimes(3)
+			})()
 		})
 
 	})
 
 })
+
+function sleep(ms) {
+	return new Promise(reject => setTimeout(reject, ms))
+}
 
 function isIterator(obj) {
 	return (
@@ -347,8 +377,4 @@ function isIterator(obj) {
 		&&
 		typeof obj?.next === 'function'
 	)
-}
-
-function sleep(ms) {
-	return new Promise(reject => setTimeout(reject, ms))
 }
