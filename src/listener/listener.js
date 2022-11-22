@@ -1,4 +1,4 @@
-export default class Handler {
+export default class EventListener {
 	isExecuted = false
 	isExecuteOnce = false
 

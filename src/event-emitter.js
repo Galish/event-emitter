@@ -1,4 +1,4 @@
-import { createHandler, isEventNameValid } from './handler'
+import { createListener, isEventNameValid } from './listener'
 import { matchesPattern } from './pattern'
 import { singleValueOrIter } from './utils'
 
@@ -9,8 +9,8 @@ class EventEmitter {
 		this.#listeners = new Map()
 	}
 
-	#addListener(handler) {
-		for (const pattern of handler) {
+	#addListener(listener) {
+		for (const pattern of listener) {
 			if (!this.#listeners.has(pattern)) {
 				this.#listeners.set(
 					pattern,
@@ -20,27 +20,27 @@ class EventEmitter {
 
 			this.#listeners
 				.get(pattern)
-				.set(handler.fn, handler)
+				.set(listener.fn, listener)
 		}
 	}
 
 	on(...args) {
-		this.#addListener(createHandler(...args))
+		this.#addListener(createListener(...args))
 	}
 
 	once(...args) {
-		this.#addListener(createHandler(...args).executeOnce(true))
+		this.#addListener(createListener(...args).executeOnce(true))
 	}
 
 	off(...args) {
-		const handler = createHandler(...args)
+		const listener = createListener(...args)
 
-		for (const pattern of handler) {
+		for (const pattern of listener) {
 			if (!this.#listeners.has(pattern)) {
 				continue
 			}
 
-			if (handler.fn == null) {
+			if (listener.fn == null) {
 				this.#listeners
 					.get(pattern)
 					.clear()
@@ -50,7 +50,7 @@ class EventEmitter {
 
 			this.#listeners
 				.get(pattern)
-				.delete(handler.fn)
+				.delete(listener.fn)
 		}
 	}
 
@@ -59,16 +59,16 @@ class EventEmitter {
 			throw new Error('Invalid event name format: ' + eventName)
 		}
 
-		for (const [ pattern, handlers ] of this.#listeners.entries()) {
+		for (const [ pattern, listeners ] of this.#listeners.entries()) {
 			if (!matchesPattern(pattern, eventName)) {
 				continue
 			}
 
-			for (const handler of handlers.values()) {
-				handler.execute(pattern, ...args)
+			for (const listener of listeners.values()) {
+				listener.execute(pattern, ...args)
 
-				if (handler.isDone) {
-					this.off(...handler, handler.fn)
+				if (listener.isDone) {
+					this.off(...listener, listener.fn)
 				}
 			}
 		}

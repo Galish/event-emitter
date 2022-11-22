@@ -1,7 +1,7 @@
-import Handler from './handler'
+import EventListener from './listener'
 import { singleValueOrIter } from '../utils'
 
-export default class MultipleEventHandler extends Handler {
+export default class MultiEventListener extends EventListener {
 	#empty = Symbol('empty')
 	#data = new Map()
 

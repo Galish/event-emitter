@@ -1,45 +1,45 @@
-import Handler from './handler'
-import MultipleEventHandler from './multiple-event-handler'
-import createHandler from './create'
+import Listener from './listener'
+import MultiEventListener from './multi-event-listener'
+import createListener from './create'
 
-describe('Create handler', () => {
+describe('Create listener', () => {
 
 	it('should throw an error with no arguments', () => {
 		expect(
-			() => createHandler()
+			() => createListener()
 		).toThrow('Invalid event name pattern: undefined')
 	})
 
 	it('should throw an error with event name argument only', () => {
 		expect(
-			() => createHandler('event-name')
+			() => createListener('event-name')
 		).toThrow('Invalid event name pattern: undefined')
 	})
 
 	it('should throw an error with function argument only', () => {
 		expect(
-			() => createHandler(() => {})
+			() => createListener(() => {})
 		).toThrow('Invalid event name pattern: undefined')
 	})
 
 	it('should throw an error with function argument only', () => {
-		const handler = createHandler(
+		const listener = createListener(
 			'event-name',
 			() => {}
 		)
 
-		expect(handler instanceof Handler).toBeTruthy()
+		expect(listener instanceof Listener).toBeTruthy()
 	})
 
 	it('should throw an error with function argument only', () => {
-		const handler = createHandler(
+		const listener = createListener(
 			'event-name 1',
 			'event-name 2',
 			'event-name 3',
 			() => {}
 		)
 
-		expect(handler instanceof MultipleEventHandler).toBeTruthy()
+		expect(listener instanceof MultiEventListener).toBeTruthy()
 	})
 
 })
