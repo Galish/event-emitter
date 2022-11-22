@@ -2,7 +2,35 @@
 
 # Event-emitter
 
+## Features
+- Namespaces with wildcards
+- Multiple (dependent) event listeners
+- Stream support
+
 ## API
+
+### Namespaces
+
+Event emitter supports event __Namespaces with Wildcards__.
+
+To use namespaces/wildcards, pass the event name as a string separated by a delimiter `(the . character)` and include a wild card `(the * character)`. The following events would be observed for an event `foo.*.baz`:
+
+```javascript
+emitter.emit('foo.bar.baz');
+emitter.emit('foo.baaaar.baz');
+emitter.emit('foo.b.baz');
+```
+
+#### Multi-level Wildcards
+
+A double wildcard `(the ** string)` matches any number of levels (zero or more) of events. So if for example `foo.**` is passed to the on method, the following events would be observed:
+
+```javascript
+emitter.emit('foo');
+emitter.emit('foo.bar');
+emitter.emit('foo.bar.baz');
+emitter.emit('foo.bar.baz.zzz');
+```
 
 ### Class EventEmitter
 
@@ -15,6 +43,8 @@
 - `off(...events, listener): void` - removes listener for the specified event(s).
 
 ## Usage
+
+#### Listener
 
 ```javascript
 import EventEmitter from './event-emitter';
@@ -90,6 +120,8 @@ emitter.emit('foo.bar.baz3', 2022);
 
 emitter.off('foo.bar.*', handler);
 ```
+
+**One time listener**
 
 ```javascript
 import EventEmitter from './event-emitter';
