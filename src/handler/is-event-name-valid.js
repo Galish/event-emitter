@@ -1,4 +1,4 @@
-export default function isEventNamePatternValid(input = '') {
+export default function isEventNameValid(input = '') {
 	return (
 		typeof input === 'string'
 		&&

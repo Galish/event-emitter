@@ -1,4 +1,4 @@
-export default function pattern2RegExp(pattern = '') {
+export default function patternToRegExp(pattern = '') {
 	if (typeof pattern !== 'string') {
 		throw new Error('Pattern must be a string')
 	}

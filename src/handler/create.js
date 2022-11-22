@@ -1,6 +1,6 @@
 import Handler from './handler'
 import MultipleEventHandler from './multiple-event-handler'
-import { isEventNamePatternValid } from '../helpers'
+import isEventNameValid from './is-event-name-valid'
 
 export default function createHandler(...args) {
 	const events = args.length > 1
@@ -10,7 +10,7 @@ export default function createHandler(...args) {
 	const fn = args[ args.length - 1 ]
 
 	for (const pattern of events) {
-		if (!isEventNamePatternValid(pattern)) {
+		if (!isEventNameValid(pattern)) {
 			throw new Error('Invalid event name pattern: ' + pattern)
 		}
 	}

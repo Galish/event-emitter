@@ -1,4 +1,4 @@
-import matchesPattern from './matches-pattern'
+import matchesPattern from './matches'
 
 describe('String matching pattern', () => {
 

@@ -111,8 +111,6 @@ emitter.emit('foo.bar.baz3');
 emitter.emit('foo.bar.baz4', 4, 5);
 emitter.emit('foo.bar.baz5', 'baz');
 emitter.emit('foo.bar.baz3', 2022);
-
-emitter.off('foo.bar.*', handler);
 ```
 
 #### Stream

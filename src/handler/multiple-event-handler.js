@@ -1,19 +1,17 @@
-export default class MultipleEventHandler {
+import Handler from './handler'
+
+export default class MultipleEventHandler extends Handler {
 	#empty = Symbol('empty')
 	#data = new Map()
-	#isExecuted = false
-	#isExecuteOnce = false
 
 	constructor(patterns, fn) {
+		super(patterns, fn)
+
 		for (const pattern of patterns) {
 			this.#data.set(pattern, this.#empty)
 		}
 
 		this.fn = fn
-	}
-
-	get isDone() {
-		return this.#isExecuteOnce && this.#isExecuted
 	}
 
 	execute(pattern, ...args) {
@@ -29,15 +27,9 @@ export default class MultipleEventHandler {
 			results.push(...data)
 		}
 
-		this.#isExecuted = true
+		this.isExecuted = true
 
 		return this.fn(...results)
-	}
-
-	executeOnce(value = true) {
-		this.#isExecuteOnce = value
-
-		return this
 	}
 
 	[ Symbol.iterator ]() {

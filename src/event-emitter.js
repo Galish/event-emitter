@@ -1,5 +1,5 @@
-import createHandler from './handler'
-import { isEventNamePatternValid, matchesPattern } from './helpers'
+import { createHandler, isEventNameValid } from './handler'
+import { matchesPattern } from './pattern'
 
 class EventEmitter {
 	#listeners
@@ -54,7 +54,7 @@ class EventEmitter {
 	}
 
 	emit(eventName, ...args) {
-		if (!isEventNamePatternValid(eventName)) {
+		if (!isEventNameValid(eventName)) {
 			throw new Error('Invalid event name format: ' + eventName)
 		}
 
